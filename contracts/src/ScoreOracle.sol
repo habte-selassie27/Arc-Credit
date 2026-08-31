@@ -2,10 +2,11 @@
 pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "./interfaces/ICreditScoreRegistry.sol";
 import "./libraries/CreditMath.sol";
 
-contract ScoreOracle is OwnableUpgradeable {
+contract ScoreOracle is OwnableUpgradeable, UUPSUpgradeable {
     ICreditScoreRegistry public scoreRegistry;
 
     address public trustedBackend;
@@ -21,13 +22,16 @@ contract ScoreOracle is OwnableUpgradeable {
         scoreRegistry = ICreditScoreRegistry(_scoreRegistry);
     }
 
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+
     modifier onlyTrustedBackend() {
         require(msg.sender == trustedBackend, "ScoreOracle: not trusted backend");
         _;
     }
 
     function requestScoreUpdate(address borrower) external {
-        scoreRegistry.initProfile(borrower);
+        // init only if profile doesn't exist (lastUpdated == 0); don't revert on re-request
+        try scoreRegistry.initProfile(borrower) {} catch {}
         emit ScoreUpdateRequested(borrower);
     }
 

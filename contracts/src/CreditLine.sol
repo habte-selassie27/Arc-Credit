@@ -2,11 +2,12 @@
 pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "./interfaces/ICreditScoreRegistry.sol";
 import "./interfaces/ICreditLine.sol";
 import "./libraries/CreditMath.sol";
 
-contract CreditLine is ICreditLine, OwnableUpgradeable {
+contract CreditLine is ICreditLine, OwnableUpgradeable, UUPSUpgradeable {
     ICreditScoreRegistry public scoreRegistry;
 
     mapping(address => uint256) public creditLimit;
@@ -19,31 +20,36 @@ contract CreditLine is ICreditLine, OwnableUpgradeable {
         scoreRegistry = ICreditScoreRegistry(_scoreRegistry);
     }
 
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+
     modifier onlyAuthorizedVault() {
         require(authorizedVaults[msg.sender], "CreditLine: unauthorized vault");
         _;
     }
 
-    function getCreditLimit(address borrower) external view override returns (uint256) {
+    function getCreditLimit(address borrower) public view override returns (uint256) {
         uint16 score = scoreRegistry.getScore(borrower);
         return CreditMath.getCreditLimit(score);
     }
 
-    function getAvailableCredit(address borrower) external view override returns (uint256) {
+    function getAvailableCredit(address borrower) public view override returns (uint256) {
         return availableCredit[borrower];
     }
 
-    function getInterestRate(address borrower) external view override returns (uint256) {
+    function getInterestRate(address borrower) public view override returns (uint256) {
         uint16 score = scoreRegistry.getScore(borrower);
         return CreditMath.getInterestRate(score);
     }
 
     function refreshCredit(address borrower) external {
         uint256 newLimit = getCreditLimit(borrower);
+        uint256 oldLimit = creditLimit[borrower];
+        uint256 oldAvailable = availableCredit[borrower];
+        uint256 locked = oldLimit > oldAvailable ? oldLimit - oldAvailable : 0;
+
         creditLimit[borrower] = newLimit;
 
-        uint256 locked = newLimit - availableCredit[borrower];
-        if (newLimit < locked) {
+        if (newLimit <= locked) {
             availableCredit[borrower] = 0;
         } else {
             availableCredit[borrower] = newLimit - locked;

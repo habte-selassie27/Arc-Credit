@@ -1,0 +1,181 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@200;400;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-void: #000000;
+  --color-bone-white: #ffffff;
+  --color-ash-gray: #9a9a9a;
+  --color-silver-mist: #bdbdbd;
+  --color-electric-iris: #8052ff;
+  --color-saffron-spark: #ffb829;
+  --color-deep-verdant: #15846e;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
+
+  --spacing-unit: 6px;
+  --radius-3xl: 24px;
+  --radius-full: 9999px;
+
+  --page-max-width: 1280px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-feature-settings: "ss01" on;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-weight: 200;
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--color-bone-white);
+  background: var(--color-void);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headline utility — weight 400, aggressive negative tracking */
+.heading-display {
+  font-weight: 400;
+  font-size: 113px;
+  line-height: 1.1;
+  letter-spacing: -4.52px;
+}
+
+.heading-lg {
+  font-weight: 400;
+  font-size: 78px;
+  line-height: 1.1;
+  letter-spacing: -3.12px;
+}
+
+.heading {
+  font-weight: 400;
+  font-size: 48px;
+  line-height: 1.1;
+  letter-spacing: -1.68px;
+}
+
+.heading-sm {
+  font-weight: 400;
+  font-size: 42px;
+  line-height: 1.2;
+  letter-spacing: -1.68px;
+}
+
+.subheading {
+  font-weight: 400;
+  font-size: 36px;
+  line-height: 1.2;
+}
+
+.heading-xs {
+  font-weight: 400;
+  font-size: 27px;
+  line-height: 1;
+}
+
+.heading-2xs {
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1.25;
+  letter-spacing: -0.48px;
+}
+
+/* Nav label — weight 600, uppercase, tracking */
+.nav-label {
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.2;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+
+/* Body text — weight 200 (Dala signature) */
+.body-text {
+  font-weight: 200;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+/* Caption */
+.caption {
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* Primary violet pill button */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-electric-iris);
+  color: var(--color-bone-white);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.2;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+  padding: 14.4px 16px;
+  border-radius: 22.5px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.btn-primary:hover {
+  opacity: 0.85;
+}
+
+.btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Ghost text link */
+.ghost-link {
+  background: none;
+  border: none;
+  color: var(--color-ash-gray);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.ghost-link:hover {
+  color: var(--color-bone-white);
+}
+
+/* Amber accent text */
+.accent-text {
+  color: var(--color-saffron-spark);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-void);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #222;
+  border-radius: 3px;
+}

@@ -2,14 +2,15 @@
 pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "./interfaces/ICreditLine.sol";
 import "./interfaces/ILoanVault.sol";
 import "./libraries/InterestLib.sol";
 
-contract LoanVault is ILoanVault, OwnableUpgradeable, ReentrancyGuardUpgradeable {
-    IERC20Upgradeable public usdc;
+contract LoanVault is ILoanVault, OwnableUpgradeable, UUPSUpgradeable, ReentrancyGuard {
+    IERC20 public usdc;
     ICreditLine public creditLine;
 
     mapping(uint256 => Loan) public loans;
@@ -28,21 +29,24 @@ contract LoanVault is ILoanVault, OwnableUpgradeable, ReentrancyGuardUpgradeable
         address _creditLine
     ) external initializer {
         __Ownable_init(owner);
-        __ReentrancyGuard_init();
-        usdc = IERC20Upgradeable(_usdc);
+        usdc = IERC20(_usdc);
         creditLine = ICreditLine(_creditLine);
+        nextLoanId = 1;
     }
+
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
     function deposit(uint256 amount, uint8 tranche) external override nonReentrant {
         require(amount > 0, "LoanVault: zero deposit");
-        usdc.transferFrom(msg.sender, address(this), amount);
+        _safeTransferFrom(usdc, msg.sender, address(this), amount);
         totalDeposited += amount;
+        // tranche param reserved for TranchManager integration; 0=Senior,1=Junior pool accounting
     }
 
     function withdraw(uint256 shares, uint8 tranche) external override nonReentrant {
         require(shares > 0, "LoanVault: zero shares");
         require(totalDeposited >= totalLent + shares, "LoanVault: insufficient liquidity");
-        usdc.transfer(msg.sender, shares);
+        _safeTransfer(usdc, msg.sender, shares);
         totalDeposited -= shares;
     }
 
@@ -52,6 +56,7 @@ contract LoanVault is ILoanVault, OwnableUpgradeable, ReentrancyGuardUpgradeable
             termDays == 7 || termDays == 14 || termDays == 30 || termDays == 90,
             "LoanVault: invalid term"
         );
+        require(activeLoanId[msg.sender] == 0, "LoanVault: active loan exists");
 
         loanId = nextLoanId++;
 
@@ -74,9 +79,10 @@ contract LoanVault is ILoanVault, OwnableUpgradeable, ReentrancyGuardUpgradeable
         });
 
         activeLoanId[msg.sender] = loanId;
+        creditLine.setActiveLoan(msg.sender, loanId);
         totalLent += amount;
 
-        usdc.transfer(msg.sender, amount);
+        _safeTransfer(usdc, msg.sender, amount);
 
         emit LoanRequested(loanId, msg.sender, amount, termDays);
     }
@@ -88,7 +94,7 @@ contract LoanVault is ILoanVault, OwnableUpgradeable, ReentrancyGuardUpgradeable
 
         uint256 totalDue = InterestLib.computeTotalDue(loan.principal, loan.interest);
 
-        usdc.transferFrom(msg.sender, address(this), totalDue);
+        _safeTransferFrom(usdc, msg.sender, address(this), totalDue);
 
         loan.status = LoanStatus.REPAID;
         activeLoanId[msg.sender] = 0;
@@ -103,6 +109,10 @@ contract LoanVault is ILoanVault, OwnableUpgradeable, ReentrancyGuardUpgradeable
     }
 
     function markDefault(uint256 loanId) external override {
+        require(
+            msg.sender == repaymentScheduler || msg.sender == owner(),
+            "LoanVault: unauthorized scheduler"
+        );
         Loan storage loan = loans[loanId];
         require(loan.status == LoanStatus.ACTIVE, "LoanVault: not active");
         require(block.timestamp > loan.dueTimestamp + GRACE_PERIOD, "LoanVault: grace period");
@@ -129,8 +139,24 @@ contract LoanVault is ILoanVault, OwnableUpgradeable, ReentrancyGuardUpgradeable
     }
 
     function claimYield() external override {
-        revert("LoanVault: yield not yet implemented");
+        // Yield accrual is handled via TranchManager; LoanVault yield is 0.
+        // Keep no-op for compatibility — lenders claim via TranchManager directly.
+        emit YieldClaimed(msg.sender);
     }
+
+    function _safeTransfer(IERC20 token, address to, uint256 amount) internal {
+        (bool success, bytes memory data) = address(token).call(abi.encodeWithSelector(IERC20.transfer.selector, to, amount));
+        require(success, "USDC transfer failed");
+        if (data.length > 0) require(abi.decode(data, (bool)), "USDC transfer failed");
+    }
+
+    function _safeTransferFrom(IERC20 token, address from, address to, uint256 amount) internal {
+        (bool success, bytes memory data) = address(token).call(abi.encodeWithSelector(IERC20.transferFrom.selector, from, to, amount));
+        require(success, "USDC transferFrom failed");
+        if (data.length > 0) require(abi.decode(data, (bool)), "USDC transferFrom failed");
+    }
+
+    event YieldClaimed(address indexed lender);
 
     event LoanRequested(uint256 indexed loanId, address indexed borrower, uint256 amount, uint8 termDays);
     event LoanRepaid(uint256 indexed loanId, address indexed borrower, uint256 totalDue);

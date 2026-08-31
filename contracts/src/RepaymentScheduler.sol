@@ -2,11 +2,12 @@
 pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "./interfaces/ILoanVault.sol";
 import "./interfaces/ICreditScoreRegistry.sol";
 import "./libraries/CreditMath.sol";
 
-contract RepaymentScheduler is OwnableUpgradeable {
+contract RepaymentScheduler is OwnableUpgradeable, UUPSUpgradeable {
     ILoanVault public loanVault;
     ICreditScoreRegistry public scoreRegistry;
 
@@ -21,6 +22,8 @@ contract RepaymentScheduler is OwnableUpgradeable {
         loanVault = ILoanVault(_loanVault);
         scoreRegistry = ICreditScoreRegistry(_scoreRegistry);
     }
+
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
     function checkAndMarkDefault(uint256 loanId) external {
         ILoanVault.Loan memory loan = loanVault.getLoan(loanId);

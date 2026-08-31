@@ -2,11 +2,12 @@
 pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract TranchManager is OwnableUpgradeable, ReentrancyGuardUpgradeable {
-    IERC20Upgradeable public usdc;
+contract TranchManager is OwnableUpgradeable, UUPSUpgradeable, ReentrancyGuard {
+    IERC20 public usdc;
 
     uint8 public constant SENIOR = 0;
     uint8 public constant JUNIOR = 1;
@@ -24,32 +25,33 @@ contract TranchManager is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         mapping(address => uint256) depositTime;
     }
 
-    TrancheInfo public senior;
-    TrancheInfo public junior;
+    TrancheInfo internal _senior;
+    TrancheInfo internal _junior;
 
     function initialize(address owner, address _usdc) external initializer {
         __Ownable_init(owner);
-        __ReentrancyGuard_init();
-        usdc = IERC20Upgradeable(_usdc);
+        usdc = IERC20(_usdc);
     }
+
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
     function deposit(address lender, uint256 amount, uint8 tranche) external nonReentrant {
         require(tranche <= 1, "TranchManager: invalid tranche");
 
         if (tranche == SENIOR) {
             require(amount >= SENIOR_MIN_DEPOSIT, "TranchManager: below senior min");
-            usdc.transferFrom(msg.sender, address(this), amount);
-            senior.totalShares += amount;
-            senior.totalDeposited += amount;
-            senior.shares[lender] += amount;
-            senior.depositTime[lender] = block.timestamp;
+            _safeTransferFrom(usdc, msg.sender, address(this), amount);
+            _senior.totalShares += amount;
+            _senior.totalDeposited += amount;
+            _senior.shares[lender] += amount;
+            _senior.depositTime[lender] = block.timestamp;
         } else {
             require(amount >= JUNIOR_MIN_DEPOSIT, "TranchManager: below junior min");
-            usdc.transferFrom(msg.sender, address(this), amount);
-            junior.totalShares += amount;
-            junior.totalDeposited += amount;
-            junior.shares[lender] += amount;
-            junior.depositTime[lender] = block.timestamp;
+            _safeTransferFrom(usdc, msg.sender, address(this), amount);
+            _junior.totalShares += amount;
+            _junior.totalDeposited += amount;
+            _junior.shares[lender] += amount;
+            _junior.depositTime[lender] = block.timestamp;
         }
 
         emit Deposited(lender, amount, tranche);
@@ -59,18 +61,18 @@ contract TranchManager is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         require(tranche <= 1, "TranchManager: invalid tranche");
 
         if (tranche == SENIOR) {
-            require(senior.shares[lender] >= shares, "TranchManager: insufficient shares");
-            senior.shares[lender] -= shares;
-            senior.totalShares -= shares;
-            senior.totalDeposited -= shares;
+            require(_senior.shares[lender] >= shares, "TranchManager: insufficient shares");
+            _senior.shares[lender] -= shares;
+            _senior.totalShares -= shares;
+            _senior.totalDeposited -= shares;
         } else {
-            require(junior.shares[lender] >= shares, "TranchManager: insufficient shares");
-            junior.shares[lender] -= shares;
-            junior.totalShares -= shares;
-            junior.totalDeposited -= shares;
+            require(_junior.shares[lender] >= shares, "TranchManager: insufficient shares");
+            _junior.shares[lender] -= shares;
+            _junior.totalShares -= shares;
+            _junior.totalDeposited -= shares;
         }
 
-        usdc.transfer(lender, shares);
+        _safeTransfer(usdc, lender, shares);
 
         emit Withdrawn(lender, shares, tranche);
     }
@@ -78,33 +80,40 @@ contract TranchManager is OwnableUpgradeable, ReentrancyGuardUpgradeable {
     function distributeYield(uint256 totalYield) external onlyOwner {
         uint256 seniorYield = (totalYield * SENIOR_YIELD_SHARE) / BPS_DENOMINATOR;
         uint256 juniorYield = totalYield - seniorYield;
-
-        if (senior.totalShares > 0) {
-            usdc.transfer(address(this), seniorYield);
-        }
-        if (junior.totalShares > 0) {
-            usdc.transfer(address(this), juniorYield);
-        }
-
+        // Yield accounting is event-driven; USDC yield is expected to be already
+        // transferred to this contract via LoanVault repay flow.
+        // No self-transfer needed — previous self-transfer was a no-op bug.
         emit YieldDistributed(totalYield, seniorYield, juniorYield);
     }
 
     function absorbLoss(uint256 lossAmount) external onlyOwner {
-        require(junior.totalShares >= lossAmount, "TranchManager: loss exceeds junior");
-        junior.totalShares -= lossAmount;
-        junior.totalDeposited -= lossAmount;
+        require(_junior.totalShares >= lossAmount, "TranchManager: loss exceeds junior");
+        _junior.totalShares -= lossAmount;
+        _junior.totalDeposited -= lossAmount;
 
         emit LossAbsorbed(lossAmount);
     }
 
     function getShares(address lender, uint8 tranche) external view returns (uint256) {
-        if (tranche == SENIOR) return senior.shares[lender];
-        return junior.shares[lender];
+        if (tranche == SENIOR) return _senior.shares[lender];
+        return _junior.shares[lender];
     }
 
     function getTotalShares(uint8 tranche) external view returns (uint256) {
-        if (tranche == SENIOR) return senior.totalShares;
-        return junior.totalShares;
+        if (tranche == SENIOR) return _senior.totalShares;
+        return _junior.totalShares;
+    }
+
+    function _safeTransfer(IERC20 token, address to, uint256 amount) internal {
+        (bool success, bytes memory data) = address(token).call(abi.encodeWithSelector(IERC20.transfer.selector, to, amount));
+        require(success, "USDC transfer failed");
+        if (data.length > 0) require(abi.decode(data, (bool)), "USDC transfer failed");
+    }
+
+    function _safeTransferFrom(IERC20 token, address from, address to, uint256 amount) internal {
+        (bool success, bytes memory data) = address(token).call(abi.encodeWithSelector(IERC20.transferFrom.selector, from, to, amount));
+        require(success, "USDC transferFrom failed");
+        if (data.length > 0) require(abi.decode(data, (bool)), "USDC transferFrom failed");
     }
 
     event Deposited(address indexed lender, uint256 amount, uint8 tranche);

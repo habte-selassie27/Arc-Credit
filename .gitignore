@@ -6,6 +6,9 @@ lib/
 contracts/out/
 frontend/dist/
 backend/dist/
+broadcast/**
+cache/**
+out/**
 
 # Environment files
 .env

@@ -62,6 +62,7 @@ contract LoanVault is ILoanVault, OwnableUpgradeable, UUPSUpgradeable, Reentranc
 
         uint256 creditAvail = creditLine.getAvailableCredit(msg.sender);
         require(creditAvail >= amount, "LoanVault: insufficient credit");
+        require(totalDeposited >= totalLent + amount, "LoanVault: insufficient liquidity");
 
         creditLine.lockCredit(msg.sender, amount);
 

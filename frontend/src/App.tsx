@@ -4,6 +4,7 @@ import BorrowerDashboard from "./pages/BorrowerDashboard";
 import LenderDashboard from "./pages/LenderDashboard";
 import CreditScore from "./pages/CreditScore";
 import ApplyLoan from "./pages/ApplyLoan";
+import Landing from "./pages/Landing";
 
 function NavButton({ to, label }: { to: string; label: string }) {
   const location = useLocation();
@@ -63,8 +64,8 @@ function App() {
 
       <main className="pt-28">
         <Routes>
+          <Route path="/" element={<Landing />} />
           <Route path="/borrow" element={<BorrowerDashboard />} />
-          <Route path="/" element={<BorrowerDashboard />} />
           <Route path="/lender" element={<LenderDashboard />} />
           <Route path="/score" element={<CreditScore />} />
           <Route path="/apply" element={<ApplyLoan />} />

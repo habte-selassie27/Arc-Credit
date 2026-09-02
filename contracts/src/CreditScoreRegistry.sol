@@ -53,6 +53,7 @@ contract CreditScoreRegistry is ICreditScoreRegistry, OwnableUpgradeable, UUPSUp
     function initProfile(address borrower) external override {
         require(_profiles[borrower].lastUpdated == 0, "CreditScore: profile exists");
         _profiles[borrower].lastUpdated = uint32(block.timestamp);
+        emit ProfileInitialized(borrower);
     }
 
     function updateScore(address borrower) external override onlyAuthorizedOracle {
@@ -63,6 +64,7 @@ contract CreditScoreRegistry is ICreditScoreRegistry, OwnableUpgradeable, UUPSUp
         _profiles[borrower].score = newScore;
         _profiles[borrower].arcPassVerified = arcPassVerified;
         _profiles[borrower].lastUpdated = uint32(block.timestamp);
+        emit ScoreSet(borrower, newScore, arcPassVerified);
     }
 
     function slashScore(address borrower, uint16 penalty) external override onlyAuthorizedOracle {
@@ -73,6 +75,7 @@ contract CreditScoreRegistry is ICreditScoreRegistry, OwnableUpgradeable, UUPSUp
             p.score -= penalty;
         }
         p.lastUpdated = uint32(block.timestamp);
+        emit ScoreSlashed(borrower, penalty, p.score);
     }
 
     function incrementLoans(address borrower) external onlyAuthorizedOracle {
@@ -90,6 +93,13 @@ contract CreditScoreRegistry is ICreditScoreRegistry, OwnableUpgradeable, UUPSUp
     }
 
     function setOracle(address oracle, bool authorized) external onlyOwner {
+        require(oracle != address(0), "CreditScore: zero address");
         authorizedOracles[oracle] = authorized;
+        emit OracleAuthorized(oracle, authorized);
     }
+
+    event OracleAuthorized(address indexed oracle, bool authorized);
+    event ScoreSet(address indexed borrower, uint16 score, bool arcPassVerified);
+    event ScoreSlashed(address indexed borrower, uint16 penalty, uint16 newScore);
+    event ProfileInitialized(address indexed borrower);
 }

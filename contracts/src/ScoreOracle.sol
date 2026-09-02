@@ -61,13 +61,19 @@ contract ScoreOracle is OwnableUpgradeable, UUPSUpgradeable {
     }
 
     function setTrustedBackend(address _trustedBackend) external onlyOwner {
+        require(_trustedBackend != address(0), "ScoreOracle: zero address");
         trustedBackend = _trustedBackend;
+        emit TrustedBackendUpdated(_trustedBackend);
     }
 
     function setScoreRegistry(address _scoreRegistry) external onlyOwner {
+        require(_scoreRegistry != address(0), "ScoreOracle: zero address");
         scoreRegistry = ICreditScoreRegistry(_scoreRegistry);
+        emit ScoreRegistryUpdated(_scoreRegistry);
     }
 
     event ScoreUpdateRequested(address indexed borrower);
     event ScoreUpdateCompleted(address indexed borrower, uint16 newScore);
+    event TrustedBackendUpdated(address indexed trustedBackend);
+    event ScoreRegistryUpdated(address indexed scoreRegistry);
 }

@@ -40,12 +40,18 @@ contract RepaymentScheduler is OwnableUpgradeable, UUPSUpgradeable {
     }
 
     function setLoanVault(address _loanVault) external onlyOwner {
+        require(_loanVault != address(0), "Scheduler: zero address");
         loanVault = ILoanVault(_loanVault);
+        emit LoanVaultUpdated(_loanVault);
     }
 
     function setScoreRegistry(address _scoreRegistry) external onlyOwner {
+        require(_scoreRegistry != address(0), "Scheduler: zero address");
         scoreRegistry = ICreditScoreRegistry(_scoreRegistry);
+        emit ScoreRegistryUpdated(_scoreRegistry);
     }
 
     event LoanDefaulted(uint256 indexed loanId, address indexed borrower, uint256 principal, uint16 penalty);
+    event LoanVaultUpdated(address indexed loanVault);
+    event ScoreRegistryUpdated(address indexed scoreRegistry);
 }

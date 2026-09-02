@@ -54,12 +54,14 @@ contract CreditLine is ICreditLine, OwnableUpgradeable, UUPSUpgradeable {
         } else {
             availableCredit[borrower] = newLimit - locked;
         }
+        emit CreditRefreshed(borrower, newLimit, availableCredit[borrower]);
     }
 
     function lockCredit(address borrower, uint256 amount) external override onlyAuthorizedVault {
         require(availableCredit[borrower] >= amount, "CreditLine: insufficient credit");
         require(activeLoanId[borrower] == 0, "CreditLine: active loan exists");
         availableCredit[borrower] -= amount;
+        emit CreditLocked(borrower, amount);
     }
 
     function releaseCredit(address borrower, uint256 amount) external override onlyAuthorizedVault {
@@ -77,10 +79,20 @@ contract CreditLine is ICreditLine, OwnableUpgradeable, UUPSUpgradeable {
     }
 
     function setVault(address vault, bool authorized) external onlyOwner {
+        require(vault != address(0), "CreditLine: zero address");
         authorizedVaults[vault] = authorized;
+        emit VaultAuthorized(vault, authorized);
     }
 
     function setScoreRegistry(address _scoreRegistry) external onlyOwner {
+        require(_scoreRegistry != address(0), "CreditLine: zero address");
         scoreRegistry = ICreditScoreRegistry(_scoreRegistry);
+        emit ScoreRegistryUpdated(_scoreRegistry);
     }
+
+    event VaultAuthorized(address indexed vault, bool authorized);
+    event ScoreRegistryUpdated(address indexed scoreRegistry);
+    event CreditRefreshed(address indexed borrower, uint256 newLimit, uint256 newAvailable);
+    event CreditLocked(address indexed borrower, uint256 amount);
+    event CreditReleased(address indexed borrower, uint256 amount);
 }

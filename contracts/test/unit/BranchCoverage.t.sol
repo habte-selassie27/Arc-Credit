@@ -112,6 +112,10 @@ contract BranchCoverageTest is Test {
         vm.prank(owner);
         registry.setOracle(address(0x10), true);
         assertTrue(registry.authorizedOracles(address(0x10)));
+        // zero address revert
+        vm.prank(owner);
+        vm.expectRevert("CreditScore: zero address");
+        registry.setOracle(address(0), true);
     }
     function test_Registry_getScore_zero() public view {
         assertEq(registry.getScore(address(0x999)), 0);
@@ -155,11 +159,27 @@ contract BranchCoverageTest is Test {
         vm.prank(user);
         vm.expectRevert();
         creditLine.setVault(address(0x10), true);
+        // zero address revert
+        vm.prank(owner);
+        vm.expectRevert("CreditLine: zero address");
+        creditLine.setVault(address(0), true);
+        // success path
+        vm.prank(owner);
+        creditLine.setVault(address(0x20), true);
+        assertTrue(creditLine.authorizedVaults(address(0x20)));
     }
     function test_CreditLine_setScoreRegistry_onlyOwner() public {
         vm.prank(user);
         vm.expectRevert();
         creditLine.setScoreRegistry(address(0x10));
+        // zero address revert
+        vm.prank(owner);
+        vm.expectRevert("CreditLine: zero address");
+        creditLine.setScoreRegistry(address(0));
+        // success path
+        vm.prank(owner);
+        creditLine.setScoreRegistry(address(0x20));
+        assertEq(address(creditLine.scoreRegistry()), address(0x20));
     }
 
     // LoanVault branches
@@ -308,6 +328,20 @@ contract BranchCoverageTest is Test {
         vm.prank(user);
         vm.expectRevert();
         vault.setCreditLine(address(0x10));
+        // zero address reverts
+        vm.prank(owner);
+        vm.expectRevert("LoanVault: zero address");
+        vault.setRepaymentScheduler(address(0));
+        vm.prank(owner);
+        vm.expectRevert("LoanVault: zero address");
+        vault.setCreditLine(address(0));
+        // success paths
+        vm.prank(owner);
+        vault.setRepaymentScheduler(address(0x20));
+        assertEq(address(vault.repaymentScheduler()), address(0x20));
+        vm.prank(owner);
+        vault.setCreditLine(address(0x20));
+        assertEq(address(vault.creditLine()), address(0x20));
     }
     function test_Vault_getLoan() public {
         vm.prank(user);
@@ -350,6 +384,20 @@ contract BranchCoverageTest is Test {
         vm.prank(user);
         vm.expectRevert();
         oracle.setScoreRegistry(address(0x10));
+        // zero address reverts
+        vm.prank(owner);
+        vm.expectRevert("ScoreOracle: zero address");
+        oracle.setTrustedBackend(address(0));
+        vm.prank(owner);
+        vm.expectRevert("ScoreOracle: zero address");
+        oracle.setScoreRegistry(address(0));
+        // success paths
+        vm.prank(owner);
+        oracle.setTrustedBackend(address(0x20));
+        assertEq(oracle.trustedBackend(), address(0x20));
+        vm.prank(owner);
+        oracle.setScoreRegistry(address(0x20));
+        assertEq(address(oracle.scoreRegistry()), address(0x20));
     }
 
     // TranchManager branches
@@ -429,5 +477,19 @@ contract BranchCoverageTest is Test {
         vm.prank(user);
         vm.expectRevert();
         scheduler.setScoreRegistry(address(0x10));
+        // zero address reverts
+        vm.prank(owner);
+        vm.expectRevert("Scheduler: zero address");
+        scheduler.setLoanVault(address(0));
+        vm.prank(owner);
+        vm.expectRevert("Scheduler: zero address");
+        scheduler.setScoreRegistry(address(0));
+        // success paths
+        vm.prank(owner);
+        scheduler.setLoanVault(address(0x20));
+        assertEq(address(scheduler.loanVault()), address(0x20));
+        vm.prank(owner);
+        scheduler.setScoreRegistry(address(0x20));
+        assertEq(address(scheduler.scoreRegistry()), address(0x20));
     }
 }

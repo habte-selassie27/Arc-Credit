@@ -58,18 +58,19 @@ contract LoanVault is ILoanVault, OwnableUpgradeable, UUPSUpgradeable, Reentranc
         );
         require(activeLoanId[msg.sender] == 0, "LoanVault: active loan exists");
 
-        loanId = nextLoanId++;
-
+        // Checks
         uint256 creditAvail = creditLine.getAvailableCredit(msg.sender);
         require(creditAvail >= amount, "LoanVault: insufficient credit");
         require(totalDeposited >= totalLent + amount, "LoanVault: insufficient liquidity");
 
-        creditLine.lockCredit(msg.sender, amount);
-
+        // View calls for interest calculation
         uint256 apr = creditLine.getInterestRate(msg.sender);
         uint256 interest = InterestLib.computeInterest(amount, apr, termDays);
         uint256 dueTimestamp = block.timestamp + (uint256(termDays) * InterestLib.SECONDS_PER_DAY);
 
+        loanId = nextLoanId++;
+
+        // Effects — all state writes before external calls (CEI)
         loans[loanId] = Loan({
             borrower: msg.sender,
             principal: amount,
@@ -78,10 +79,12 @@ contract LoanVault is ILoanVault, OwnableUpgradeable, UUPSUpgradeable, Reentranc
             termDays: termDays,
             status: LoanStatus.ACTIVE
         });
-
         activeLoanId[msg.sender] = loanId;
-        creditLine.setActiveLoan(msg.sender, loanId);
         totalLent += amount;
+
+        // Interactions — external calls that modify other contracts
+        creditLine.lockCredit(msg.sender, amount);
+        creditLine.setActiveLoan(msg.sender, loanId);
 
         _safeTransfer(usdc, msg.sender, amount);
 
@@ -132,11 +135,15 @@ contract LoanVault is ILoanVault, OwnableUpgradeable, UUPSUpgradeable, Reentranc
     }
 
     function setRepaymentScheduler(address _scheduler) external onlyOwner {
+        require(_scheduler != address(0), "LoanVault: zero address");
         repaymentScheduler = _scheduler;
+        emit RepaymentSchedulerUpdated(_scheduler);
     }
 
     function setCreditLine(address _creditLine) external onlyOwner {
+        require(_creditLine != address(0), "LoanVault: zero address");
         creditLine = ICreditLine(_creditLine);
+        emit CreditLineUpdated(_creditLine);
     }
 
     function claimYield() external override {
@@ -162,4 +169,6 @@ contract LoanVault is ILoanVault, OwnableUpgradeable, UUPSUpgradeable, Reentranc
     event LoanRequested(uint256 indexed loanId, address indexed borrower, uint256 amount, uint8 termDays);
     event LoanRepaid(uint256 indexed loanId, address indexed borrower, uint256 totalDue);
     event LoanDefaulted(uint256 indexed loanId, address indexed borrower, uint256 principal);
+    event RepaymentSchedulerUpdated(address indexed scheduler);
+    event CreditLineUpdated(address indexed creditLine);
 }

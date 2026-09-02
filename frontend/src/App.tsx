@@ -43,22 +43,26 @@ function App() {
     <div className="min-h-screen bg-void">
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-12 py-6" style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(12px)" }}>
         <div className="flex items-center gap-3">
-          <svg width="28" height="24" viewBox="0 0 80 60" fill="none">
+          <svg width="28" height="24" viewBox="0 0 120 100" fill="none">
             <defs>
-              <linearGradient id="navG1" x1="40" y1="0" x2="40" y2="56" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#AFA9EC"/>
+              <linearGradient id="navA" x1="60" y1="0" x2="60" y2="90" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#CECBF6"/>
+                <stop offset="40%" stopColor="#7F77DD"/>
                 <stop offset="100%" stopColor="#3C3489"/>
               </linearGradient>
-              <linearGradient id="navG2" x1="40" y1="0" x2="40" y2="56" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#CECBF6"/>
-                <stop offset="100%" stopColor="#534AB7"/>
+              <linearGradient id="navR" x1="10" y1="80" x2="110" y2="10" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#534AB7"/>
+                <stop offset="50%" stopColor="#AFA9EC"/>
+                <stop offset="100%" stopColor="#7F77DD"/>
               </linearGradient>
             </defs>
-            <path d="M 22 54 C 22 30, 32 8, 40 4 C 48 8, 58 30, 58 54" fill="none" stroke="url(#navG1)" strokeWidth="9" strokeLinecap="round"/>
-            <path d="M 24 52 C 24 30, 33 10, 40 6 C 47 10, 56 30, 56 52" fill="none" stroke="url(#navG2)" strokeWidth="7" strokeLinecap="round"/>
-            <path d="M 27 50 C 27 32, 34 14, 40 10 C 46 14, 53 32, 53 50" fill="none" stroke="#CECBF6" strokeWidth="2" strokeLinecap="round" opacity="0.35"/>
-            <circle cx="22" cy="54" r="4.5" fill="#534AB7"/>
-            <circle cx="58" cy="54" r="4.5" fill="#7F77DD"/>
+            <path d="M 48 8 L 20 88" stroke="url(#navA)" strokeWidth="16" strokeLinecap="round"/>
+            <path d="M 48 8 L 76 88" stroke="url(#navA)" strokeWidth="16" strokeLinecap="round"/>
+            <path d="M 28 60 L 68 60" stroke="#7F77DD" strokeWidth="6" strokeLinecap="round" opacity="0.7"/>
+            <path d="M 16 82 C 16 40, 48 8, 80 8 C 100 8, 112 28, 112 48" fill="none" stroke="url(#navR)" strokeWidth="10" strokeLinecap="round"/>
+            <path d="M 20 78 C 20 42, 48 14, 78 14 C 96 14, 106 30, 106 46" fill="none" stroke="#CECBF6" strokeWidth="3" strokeLinecap="round" opacity="0.4"/>
+            <circle cx="16" cy="86" r="5" fill="#534AB7"/>
+            <circle cx="80" cy="86" r="5" fill="#7F77DD"/>
           </svg>
           <span className="text-bone-white text-sm font-semibold" style={{ letterSpacing: "0.025em" }}>
             ArcCredit

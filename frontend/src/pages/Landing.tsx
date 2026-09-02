@@ -174,9 +174,13 @@ export default function Landing() {
       {/* Footer */}
       <footer className="py-12 border-t flex items-center justify-between" style={{ borderColor: "#1a1a1a" }}>
         <div className="flex items-center gap-3">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <path d="M12 2L2 19h20L12 2z" fill="#534AB7" />
-            <path d="M12 8L6 19h12L12 8z" fill="#15846e" opacity="0.6" />
+          <svg width="16" height="16" viewBox="0 0 64 64" fill="none">
+            <circle cx="32" cy="32" r="30" fill="#26215C"/>
+            <path d="M 32 6 A 26 26 0 1 1 7.4 49" stroke="#AFA9EC" strokeWidth="5.5" strokeLinecap="round"/>
+            <path d="M 7.4 49 A 26 26 0 0 1 32 6" stroke="#3C3489" strokeWidth="5.5" strokeLinecap="round"/>
+            <circle cx="32" cy="6" r="4" fill="#AFA9EC"/>
+            <circle cx="7.4" cy="49" r="4" fill="#7F77DD"/>
+            <text x="32" y="39" textAnchor="middle" fontSize="14" fontWeight="700" fill="#EEEDFE" fontFamily="system-ui,sans-serif">AC</text>
           </svg>
           <span className="caption text-ash-gray">ArcCredit</span>
         </div>

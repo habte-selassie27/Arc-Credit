@@ -175,9 +175,6 @@ export default function Landing() {
       <footer className="py-12 border-t flex items-center justify-between" style={{ borderColor: "#1a1a1a" }}>
         <div className="flex items-center gap-3">
           <img src="/officialbrand.png" alt="ArcCredit" height="24" style={{ objectFit: "contain" }} />
-          <span className="caption text-ash-gray">ArcCredit</span>
-        </div>
-          <span className="caption text-ash-gray">ArcCredit</span>
         </div>
         <p className="caption text-ash-gray">Built on Arc Testnet</p>
       </footer>

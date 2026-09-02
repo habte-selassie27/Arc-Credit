@@ -43,13 +43,22 @@ function App() {
     <div className="min-h-screen bg-void">
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-12 py-6" style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(12px)" }}>
         <div className="flex items-center gap-3">
-          <svg width="24" height="24" viewBox="0 0 64 64" fill="none">
-            <circle cx="32" cy="32" r="30" fill="#26215C"/>
-            <path d="M 32 6 A 26 26 0 1 1 7.4 49" stroke="#AFA9EC" strokeWidth="5.5" strokeLinecap="round"/>
-            <path d="M 7.4 49 A 26 26 0 0 1 32 6" stroke="#3C3489" strokeWidth="5.5" strokeLinecap="round"/>
-            <circle cx="32" cy="6" r="4" fill="#AFA9EC"/>
-            <circle cx="7.4" cy="49" r="4" fill="#7F77DD"/>
-            <text x="32" y="39" textAnchor="middle" fontSize="14" fontWeight="700" fill="#EEEDFE" fontFamily="system-ui,sans-serif">AC</text>
+          <svg width="28" height="24" viewBox="0 0 80 60" fill="none">
+            <defs>
+              <linearGradient id="navG1" x1="40" y1="0" x2="40" y2="56" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#AFA9EC"/>
+                <stop offset="100%" stopColor="#3C3489"/>
+              </linearGradient>
+              <linearGradient id="navG2" x1="40" y1="0" x2="40" y2="56" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#CECBF6"/>
+                <stop offset="100%" stopColor="#534AB7"/>
+              </linearGradient>
+            </defs>
+            <path d="M 22 54 C 22 30, 32 8, 40 4 C 48 8, 58 30, 58 54" fill="none" stroke="url(#navG1)" strokeWidth="9" strokeLinecap="round"/>
+            <path d="M 24 52 C 24 30, 33 10, 40 6 C 47 10, 56 30, 56 52" fill="none" stroke="url(#navG2)" strokeWidth="7" strokeLinecap="round"/>
+            <path d="M 27 50 C 27 32, 34 14, 40 10 C 46 14, 53 32, 53 50" fill="none" stroke="#CECBF6" strokeWidth="2" strokeLinecap="round" opacity="0.35"/>
+            <circle cx="22" cy="54" r="4.5" fill="#534AB7"/>
+            <circle cx="58" cy="54" r="4.5" fill="#7F77DD"/>
           </svg>
           <span className="text-bone-white text-sm font-semibold" style={{ letterSpacing: "0.025em" }}>
             ArcCredit

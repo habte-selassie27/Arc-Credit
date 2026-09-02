@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 60" fill="none">
+  <defs>
+    <linearGradient id="g1" x1="40" y1="0" x2="40" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#AFA9EC"/>
+      <stop offset="100%" stop-color="#3C3489"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="40" y1="0" x2="40" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#CECBF6"/>
+      <stop offset="100%" stop-color="#534AB7"/>
+    </linearGradient>
+  </defs>
+  <!-- Back leg (darker, left side depth) -->
+  <path d="M 22 54 C 22 30, 32 8, 40 4 C 48 8, 58 30, 58 54" fill="none" stroke="url(#g1)" stroke-width="9" stroke-linecap="round"/>
+  <!-- Front face (lighter) -->
+  <path d="M 24 52 C 24 30, 33 10, 40 6 C 47 10, 56 30, 56 52" fill="none" stroke="url(#g2)" stroke-width="7" stroke-linecap="round"/>
+  <!-- Highlight edge -->
+  <path d="M 27 50 C 27 32, 34 14, 40 10 C 46 14, 53 32, 53 50" fill="none" stroke="#CECBF6" stroke-width="2" stroke-linecap="round" opacity="0.35"/>
+  <!-- Left foot -->
+  <circle cx="22" cy="54" r="4.5" fill="#534AB7"/>
+  <!-- Right foot -->
+  <circle cx="58" cy="54" r="4.5" fill="#7F77DD"/>
+</svg>

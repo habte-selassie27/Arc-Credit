@@ -3,10 +3,9 @@ import { useAccount, useWriteContract } from "wagmi";
 import { CONTRACTS } from "../lib/contracts";
 import { parseUnits } from "viem";
 
-const USDC_ADDRESS = "0x1000000000000000000000000000000000000001" as `0x${string}`;
 const TRANCHE_ABI = [
   { name: "deposit", type: "function", stateMutability: "nonpayable", inputs: [{ name: "lender", type: "address" }, { name: "amount", type: "uint256" }, { name: "tranche", type: "uint8" }], outputs: [] },
-  { name: "withdraw", type: "function", stateMutability: "nonpayable", inputs: [{ name: "lender", type: "address" }, { name: "amount", type: "uint256" }, { name: "tranche", type: "uint8" }], outputs: [] },
+  { name: "withdraw", type: "function", stateMutability: "nonpayable", inputs: [{ name: "lender", type: "address" }, { name: "shares", type: "uint256" }, { name: "tranche", type: "uint8" }], outputs: [] },
   { name: "getShares", type: "function", stateMutability: "view", inputs: [{ name: "lender", type: "address" }, { name: "tranche", type: "uint8" }], outputs: [{ type: "uint256" }] },
 ] as const;
 const ERC20_ABI = [
@@ -44,7 +43,7 @@ export default function LenderDashboard() {
     if (amt < min) { setTxStatus(`Minimum ${activeTranche === 0 ? "10" : "5"} USDC`); return; }
     setTxStatus("Approving USDC...");
     try {
-      await writeContractAsync({ address: USDC_ADDRESS, abi: ERC20_ABI, functionName: "approve", args: [CONTRACTS.trancheManager, amt] });
+      await writeContractAsync({ address: CONTRACTS.usdc, abi: ERC20_ABI, functionName: "approve", args: [CONTRACTS.trancheManager, amt] });
       setTxStatus("Depositing...");
       await writeContractAsync({ address: CONTRACTS.trancheManager, abi: TRANCHE_ABI, functionName: "deposit", args: [address, amt, activeTranche] });
       setTxStatus("Deposited!");

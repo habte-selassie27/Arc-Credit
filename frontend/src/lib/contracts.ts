@@ -3,6 +3,7 @@ export const CONTRACTS = {
   creditLine: import.meta.env.VITE_CREDIT_LINE as `0x${string}`,
   loanVault: import.meta.env.VITE_LOAN_VAULT as `0x${string}`,
   trancheManager: import.meta.env.VITE_TRANCHE_MANAGER as `0x${string}`,
+  usdc: import.meta.env.VITE_USDC_ADDRESS as `0x${string}`,
 } as const;
 
 export const USDC_DECIMALS = 6;

@@ -52,7 +52,7 @@ function App() {
         </div>
 
         <div className="flex items-center gap-2">
-          <NavButton to="/" label="Borrow" />
+          <NavButton to="/borrow" label="Borrow" />
           <NavButton to="/lender" label="Lend" />
           <NavButton to="/score" label="Score" />
           <div className="ml-4">
@@ -63,6 +63,7 @@ function App() {
 
       <main className="pt-28">
         <Routes>
+          <Route path="/borrow" element={<BorrowerDashboard />} />
           <Route path="/" element={<BorrowerDashboard />} />
           <Route path="/lender" element={<LenderDashboard />} />
           <Route path="/score" element={<CreditScore />} />

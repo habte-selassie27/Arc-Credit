@@ -18,6 +18,8 @@ interface ICreditScoreRegistry {
     function slashScore(address borrower, uint16 penalty) external;
     function initProfile(address borrower) external;
     function incrementDefaulted(address borrower) external;
+    function incrementLoans(address borrower) external;
+    function incrementRepaid(address borrower, uint96 volumeUSDC) external;
     function setScore(address borrower, uint16 newScore, bool arcPassVerified) external;
     function setOracle(address oracle, bool authorized) external;
 }

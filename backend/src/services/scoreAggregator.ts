@@ -117,24 +117,17 @@ export async function computeScore(address: string): Promise<ScoreBreakdown> {
     breakdown.walletAge.weighted
   );
 
-  // expose extra for oracle
+  // expose extra for oracle — all inputs to CreditMath.computeScore must be 0-1000 normalized
   (breakdown as any)._oracleArgs = {
     arcPassKycScore: kycRaw,
     arcPassRepScore: repRaw,
     repaymentRaw,
-    usdcThroughput90d: throughputUSDCToUint96(totalRepaid),
+    usdcThroughput90d: usdcThroughputRaw, // normalized 0-1000, NOT raw USDC bigint
     walletAgeDays,
     arcPassVerified: kycVerified,
   };
 
   return breakdown;
-}
-
-function throughputUSDCToUint96(val: number): bigint {
-  // totalRepaid is in 6 decimals, cap to uint96 max
-  const max = (1n << 96n) - 1n;
-  const v = BigInt(Math.floor(val));
-  return v > max ? max : v;
 }
 
 export async function refreshAndStoreScore(address: string): Promise<ScoreBreakdown> {

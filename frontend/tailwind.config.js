@@ -8,9 +8,14 @@ export default {
         "bone-white": "#ffffff",
         "ash-gray": "#9a9a9a",
         "silver-mist": "#bdbdbd",
-        "electric-iris": "#8052ff",
+        "electric-iris": "#534AB7",
+        "iris-light": "#7F77DD",
+        "iris-wash": "#EEEDFE",
         "saffron-spark": "#ffb829",
         "deep-verdant": "#15846e",
+        "card-bg": "#0a0a0a",
+        "card-border": "#1a1a1a",
+        "muted-bg": "#0f0f0f",
       },
       fontFamily: {
         sans: [
@@ -22,6 +27,13 @@ export default {
           "Segoe UI",
           "Roboto",
           "sans-serif",
+        ],
+        mono: [
+          "JetBrains Mono",
+          "SF Mono",
+          "Fira Code",
+          "ui-monospace",
+          "monospace",
         ],
       },
       fontSize: {

@@ -46,6 +46,9 @@ contract ScoreOracle is OwnableUpgradeable, UUPSUpgradeable {
     ) external onlyTrustedBackend {
         require(arcPassKycScore <= 1000, "ScoreOracle: invalid KYC score");
         require(arcPassRepScore <= 1000, "ScoreOracle: invalid rep score");
+        require(repaymentRaw <= 1000, "ScoreOracle: invalid repayment score");
+        require(usdcThroughput90d <= 1000, "ScoreOracle: invalid throughput score");
+        require(walletAgeDays <= 1000, "ScoreOracle: invalid wallet age");
 
         uint16 finalScore = CreditMath.computeScore(
             arcPassKycScore,

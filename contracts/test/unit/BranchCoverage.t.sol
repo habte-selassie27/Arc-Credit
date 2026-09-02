@@ -50,7 +50,7 @@ contract BranchCoverageTest is Test {
         tm = TranchManager(address(tmProxy));
 
         LoanVault vaultImpl = new LoanVault();
-        ERC1967Proxy vaultProxy = new ERC1967Proxy(address(vaultImpl), abi.encodeCall(LoanVault.initialize, (owner, address(usdc), address(creditLine))));
+        ERC1967Proxy vaultProxy = new ERC1967Proxy(address(vaultImpl), abi.encodeCall(LoanVault.initialize, (owner, address(usdc), address(creditLine), address(registry))));
         vault = LoanVault(address(vaultProxy));
 
         RepaymentScheduler schedImpl = new RepaymentScheduler();
@@ -224,7 +224,7 @@ contract BranchCoverageTest is Test {
             CreditScoreRegistry smallReg = registry;
             CreditLine smallLine = creditLine;
             LoanVault smallVaultImpl = new LoanVault();
-            ERC1967Proxy smallProxy = new ERC1967Proxy(address(smallVaultImpl), abi.encodeCall(LoanVault.initialize, (owner, address(smallUsdc), address(smallLine))));
+            ERC1967Proxy smallProxy = new ERC1967Proxy(address(smallVaultImpl), abi.encodeCall(LoanVault.initialize, (owner, address(smallUsdc), address(smallLine), address(smallReg))));
             LoanVault smallVault = LoanVault(address(smallProxy));
             vm.prank(owner);
             smallLine.setVault(address(smallVault), true);

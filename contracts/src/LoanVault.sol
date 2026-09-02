@@ -6,12 +6,14 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "./interfaces/ICreditLine.sol";
+import "./interfaces/ICreditScoreRegistry.sol";
 import "./interfaces/ILoanVault.sol";
 import "./libraries/InterestLib.sol";
 
 contract LoanVault is ILoanVault, OwnableUpgradeable, UUPSUpgradeable, ReentrancyGuard {
     IERC20 public usdc;
     ICreditLine public creditLine;
+    ICreditScoreRegistry public scoreRegistry;
 
     mapping(uint256 => Loan) public loans;
     mapping(address => uint256) public activeLoanId;
@@ -26,11 +28,13 @@ contract LoanVault is ILoanVault, OwnableUpgradeable, UUPSUpgradeable, Reentranc
     function initialize(
         address owner,
         address _usdc,
-        address _creditLine
+        address _creditLine,
+        address _scoreRegistry
     ) external initializer {
         __Ownable_init(owner);
         usdc = IERC20(_usdc);
         creditLine = ICreditLine(_creditLine);
+        scoreRegistry = ICreditScoreRegistry(_scoreRegistry);
         nextLoanId = 1;
     }
 
@@ -85,6 +89,7 @@ contract LoanVault is ILoanVault, OwnableUpgradeable, UUPSUpgradeable, Reentranc
         // Interactions — external calls that modify other contracts
         creditLine.lockCredit(msg.sender, amount);
         creditLine.setActiveLoan(msg.sender, loanId);
+        scoreRegistry.incrementLoans(msg.sender);
 
         _safeTransfer(usdc, msg.sender, amount);
 
@@ -106,6 +111,7 @@ contract LoanVault is ILoanVault, OwnableUpgradeable, UUPSUpgradeable, Reentranc
 
         creditLine.releaseCredit(msg.sender, loan.principal);
         creditLine.setActiveLoan(msg.sender, 0);
+        scoreRegistry.incrementRepaid(msg.sender, uint96(loan.principal));
 
         uint256 protocolFee = InterestLib.computeProtocolFee(loan.interest);
 
@@ -146,6 +152,12 @@ contract LoanVault is ILoanVault, OwnableUpgradeable, UUPSUpgradeable, Reentranc
         emit CreditLineUpdated(_creditLine);
     }
 
+    function setScoreRegistry(address _scoreRegistry) external onlyOwner {
+        require(_scoreRegistry != address(0), "LoanVault: zero address");
+        scoreRegistry = ICreditScoreRegistry(_scoreRegistry);
+        emit ScoreRegistryUpdated(_scoreRegistry);
+    }
+
     function claimYield() external override {
         // Yield accrual is handled via TranchManager; LoanVault yield is 0.
         // Keep no-op for compatibility — lenders claim via TranchManager directly.
@@ -171,4 +183,5 @@ contract LoanVault is ILoanVault, OwnableUpgradeable, UUPSUpgradeable, Reentranc
     event LoanDefaulted(uint256 indexed loanId, address indexed borrower, uint256 principal);
     event RepaymentSchedulerUpdated(address indexed scheduler);
     event CreditLineUpdated(address indexed creditLine);
+    event ScoreRegistryUpdated(address indexed scoreRegistry);
 }

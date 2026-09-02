@@ -58,6 +58,7 @@ contract TranchManager is OwnableUpgradeable, UUPSUpgradeable, ReentrancyGuard {
     }
 
     function withdraw(address lender, uint256 shares, uint8 tranche) external nonReentrant {
+        require(lender == msg.sender, "TranchManager: unauthorized");
         require(tranche <= 1, "TranchManager: invalid tranche");
 
         if (tranche == SENIOR) {

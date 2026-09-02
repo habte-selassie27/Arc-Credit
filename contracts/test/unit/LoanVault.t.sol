@@ -31,7 +31,7 @@ contract LoanVaultTest is Test {
         creditLine = CreditLine(address(lineProxy));
 
         LoanVault vaultImpl = new LoanVault();
-        ERC1967Proxy vaultProxy = new ERC1967Proxy(address(vaultImpl), abi.encodeCall(LoanVault.initialize, (owner, address(usdc), address(creditLine))));
+        ERC1967Proxy vaultProxy = new ERC1967Proxy(address(vaultImpl), abi.encodeCall(LoanVault.initialize, (owner, address(usdc), address(creditLine), address(registry))));
         vault = LoanVault(address(vaultProxy));
 
         vm.prank(owner);

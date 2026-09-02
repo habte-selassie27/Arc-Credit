@@ -43,7 +43,7 @@ function App() {
     <div className="min-h-screen bg-void">
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-12 py-6" style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(12px)" }}>
         <div className="flex items-center gap-3">
-          <img src="/officialbrand.png" alt="ArcCredit" height="68" style={{ objectFit: "contain" }} />
+          <img src="/officialbrand.png" alt="ArcCredit" height="40" style={{ objectFit: "contain" }} />
         </div>
 
         <div className="flex items-center gap-2">

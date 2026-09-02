@@ -43,7 +43,7 @@ function App() {
     <div className="min-h-screen bg-void">
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-12 py-6" style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(12px)" }}>
         <div className="flex items-center gap-3">
-          <svg width="28" height="24" viewBox="0 0 120 100" fill="none">
+          <svg width="40" height="34" viewBox="0 0 120 100" fill="none">
             <defs>
               <linearGradient id="navA" x1="60" y1="0" x2="60" y2="90" gradientUnits="userSpaceOnUse">
                 <stop offset="0%" stopColor="#CECBF6"/>
@@ -64,7 +64,7 @@ function App() {
             <circle cx="16" cy="86" r="5" fill="#534AB7"/>
             <circle cx="80" cy="86" r="5" fill="#7F77DD"/>
           </svg>
-          <span className="text-bone-white text-sm font-semibold" style={{ letterSpacing: "0.025em" }}>
+          <span className="text-bone-white text-base font-semibold" style={{ letterSpacing: "0.025em" }}>
             ArcCredit
           </span>
         </div>
